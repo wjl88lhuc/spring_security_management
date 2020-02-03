@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--释放静态资源-->
+    <!-- security="none" 表示 跟security框架没有任何的关系,不再被security过滤拦截了。  -->
+    <security:http pattern="/css/**" security="none"/>
+    <security:http pattern="/img/**" security="none"/>
+    <security:http pattern="/plugins/**" security="none"/>
+    <security:http pattern="/failer.jsp" security="none"/>
+
+    <!--设置可以用spring的el表达式配置Spring Security并自动生成对应配置组件（过滤器）-->
+    <!--auto-config="true" 表示自动加载spring-security的配置文件-->
+    <!--use-expressions="true" 表示使用spring的el表达式来配置spring-security-->
+    <security:http auto-config="true" use-expressions="true">
+        <!--让认证页面可以匿名访问（也就是说可以不登陆就可以访问登陆页面）-->
+        <security:intercept-url pattern="/login.jsp" access="permitAll()"/>
+
+        <!--使用spring的el表达式来指定项目所有资源访问都必须有ROLE_USER或ROLE_ADMIN角色-->
+        <security:intercept-url pattern="/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
+        <!--配置认证信息-->
+        <!--login-page="login.jsp": 如果不提供用户名与密码而直接访问资源的话，会被拒绝，拒绝之后跳转到login.jsp 页面 -->
+        <!--login-processing-url="/login"  : 没有提供用户名与密码而被拒绝访问资源之后的处理器（controller）的地址，
+        通过这个地址就能够跳转到  login-page 所指定的页面。
+        -->
+        <!--default-target-url="index.jsp" ： 从 login-page 指定的页面重新登陆之后跳转的页面。 -->
+        <!--认证失败前往的页面-->
+        <security:form-login login-page="/login.jsp" login-processing-url="/login" default-target-url="/index.jsp"
+                             authentication-failure-url="/failer.jsp"/>
+
+        <!--配置退出登陆信息-->
+        <security:logout logout-url="/logout" logout-success-url="/login.jsp"/>
+
+        <!--禁用csrf防护机制-->
+        <!--<security:csrf disabled="true"/>-->
+    </security:http>
+
+    <!--把加密对象梵高ioc容器中-->
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <!--设置Spring Security认证用户信息的来源-->
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="userServiceImpl">
+            <security:password-encoder ref="passwordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans>
