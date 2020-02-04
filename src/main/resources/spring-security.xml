@@ -35,6 +35,19 @@
 
         <!--禁用csrf防护机制-->
         <!--<security:csrf disabled="true"/>-->
+
+        <!--
+        开启remember me过滤器，
+        data-source-ref="dataSource" 指定数据库连接池
+        token-validity-seconds="60" 设置token存储时间为60秒 可省略
+        remember-me-parameter="remember-me" 指定记住的参数名 可省略
+        use-secure-cookie="true" 表示 token不写在cookie中，token只保存在数据库中。这样安全。
+        -->
+        <security:remember-me data-source-ref="dataSource"
+                              token-validity-seconds="60"
+                              remember-me-parameter="remember-me"
+                              use-secure-cookie="true"
+        />
     </security:http>
 
     <!--把加密对象梵高ioc容器中-->
@@ -46,5 +59,6 @@
             <security:password-encoder ref="passwordEncoder"/>
         </security:authentication-provider>
     </security:authentication-manager>
+
 
 </beans>
